@@ -268,3 +268,4 @@ cython_debug/
 /settings.ini
 /database.db
 /backup/
+/creds.json
