@@ -79,10 +79,9 @@ def get_menu(sport):
 async def parse_table(url, name_tour):
     r = requests.get(url,
                      headers=headers)
-    print(url)
     src = r.text
     soup = BeautifulSoup(src, 'lxml')
-    name_tour1 = soup.find('div', class_='select_row').text.split('.')[1]
+
     script_text = soup.find_all('script')[2].text
     reg = re.findall(r'data: {\"data_key\" : \"(\w*)\"', script_text)[0]
 
@@ -109,7 +108,7 @@ async def parse_table(url, name_tour):
                 print(line[:6])
                 all_data.append(line[:6])
     all_data.reverse()
-    all_data[0][0] = name_tour1
+    all_data[0][0] = name_tour
     with open('data.csv', 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerows(
@@ -163,32 +162,3 @@ def push_csv_to_gsheet(sheet_id, worksheet_name, column=0):
     request = API.spreadsheets().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=body)
     response = request.execute()
     return response
-
-
-def parse_today(sport):
-    if sport == 'hockey':
-        url = 'https://old.24score.pro/ice_hockey/'
-    elif sport == 'football':
-        url = 'https://old.24score.pro/'
-    elif sport == 'basketball':
-        url = 'https://old.24score.pro/basketball/'
-    req = requests.get(url)
-    src = req.text
-    soup = BeautifulSoup(src, 'lxml')
-    champs = soup.find_all('th', class_='champheader')
-    champs_list = []
-    for champ in champs:
-        champs_list.append(champ.text + " | " + champ.find('a').get('href'))
-
-    return champs_list
-
-
-def get_date_time(url):
-    req = requests.get(url)
-    src = req.text
-    soup = BeautifulSoup(src, 'lxml')
-    section = soup.find('select', class_='sel_season').find_all('option')
-    times = []
-    for sec in section:
-        times.append(sec.text)
-    return times

@@ -20,5 +20,4 @@ async def on_startup(dp):
 
 if __name__ == '__main__':
     db.create_subsribtions()
-    db.create_queue()
     executor.start_polling(dp, on_startup=on_startup)
