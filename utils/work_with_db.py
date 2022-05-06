@@ -12,6 +12,11 @@ class SQLite:
             "CREATE TABLE IF NOT EXISTS subscriptions(increment INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER,"
             "status BOOL, balance INTEGER,user_login CHAR (100))")
 
+    def create_queue(self):
+        """создаем таблицу с очередью на парсинг"""
+        self.cursor.execute(
+            "CREATE TABLE IF NOT EXISTS queue(tour TEXT)")
+
     def get_subscriptions(self, status="true"):
         """Получаем всех активных подписчиков бота"""
         with self.connection:
@@ -36,3 +41,18 @@ class SQLite:
         with self.connection:
             self.cursor.execute(f"SELECT * FROM subscriptions WHERE user_id = {user_id}")
             return self.cursor.fetchall()
+
+    def update_queue(self, tour):
+        with self.connection:
+            self.cursor.execute(
+                f"""INSERT INTO queue (tour) VALUES("{tour}")""")
+
+    def get_queue(self):
+        """Получаем все"""
+        with self.connection:
+            self.cursor.execute("SELECT * FROM queue")
+            return self.cursor.fetchall()
+
+    def clear_queue(self):
+        with self.connection:
+            self.cursor.execute("DELETE FROM queue")
