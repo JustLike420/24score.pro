@@ -10,6 +10,7 @@ db = SQLite()
 async def start(message: types.Message):
     if not db.subscriber_exists(message.from_user.id):
         db.add_subscriber(message.from_user.id, str(message.from_user.username))
+
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     buttons = ['Хоккей', 'Футбол', 'Баскетбол', 'Матчи сегодня']
     markup.add(*buttons)
