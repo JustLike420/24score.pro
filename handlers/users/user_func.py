@@ -246,7 +246,12 @@ async def clear_queue(call: types.CallbackQuery):
         link = tour[0].split(' | ')[1]
         sport = link.replace('https://old.24score.pro/', '').split('/')[0]
         await parse_table(link, name)
-        sheet_name = 'test'
+        if sport == 'hockey':
+            sheet_name = 'Hockey'
+        elif sport == 'football':
+            sheet_name = 'Football'
+        elif sport == 'basketball':
+            sheet_name = 'Basketball'
         push_csv_to_gsheet(
             worksheet_name=sheet_name,
             sheet_id=find_sheet_id_by_name(sheet_name),

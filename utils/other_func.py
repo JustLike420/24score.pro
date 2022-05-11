@@ -150,16 +150,17 @@ def push_csv_to_gsheet(sheet_id, worksheet_name, column=0):
             }
         }]
     }
-    # if worksheet_name == 'Hockey':
-    #     range1 = "'Hockey'!A1:K1500"
-    # elif worksheet_name == 'Football':
-    #     range1 = "'Football'!A1:N1500"
-    # else:
-    #     range1 = ''
-    # request1 = API.spreadsheets().values().clear(
-    #     spreadsheetId=SPREADSHEET_ID,
-    # ).execute()
-    # print(request1)
+    if worksheet_name == 'Hockey':
+        range1 = "'Hockey'!A1:Z1500"
+    elif worksheet_name == 'Football':
+        range1 = "'Football'!A1:Z1500"
+    else:
+        range1 = "'Basketball'!A1:Z1500"
+    request1 = API.spreadsheets().values().clear(
+        spreadsheetId=SPREADSHEET_ID,
+        range=range1,
+    ).execute()
+    print(request1)
     request = API.spreadsheets().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=body)
     response = request.execute()
     return response
