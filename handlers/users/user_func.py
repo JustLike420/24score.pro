@@ -2,7 +2,8 @@ from aiogram import types
 from aiogram.dispatcher.filters import Text
 
 from loader import dp, bot
-from utils.other_func import get_menu, parse_table, push_csv_to_gsheet, find_sheet_id_by_name, parse_today, get_date_time
+from utils.other_func import get_menu, parse_table, push_csv_to_gsheet, find_sheet_id_by_name, parse_today, \
+    get_date_time, clear_sheet
 from utils.work_with_db import SQLite
 from keyboards import buy_item_open_category_ap, buy_item_next_page_category_ap, buy_item_previous_page_category_ap
 # составление меню выбора спорта
@@ -54,9 +55,10 @@ async def handle_query_foot_link(call: types.CallbackQuery):
             link = types.InlineKeyboardButton(text=f'{name_tour}', callback_data=f't3_hockey_{country}_{name_tour}')
             markup2.add(link)
     elif sport == 'football':
+        # 't3_football_Россия_Суперкубок_России'
         for links in football_menu[country]:
             name_tour = links.split(' | ')[0]
-            link = types.InlineKeyboardButton(text=f'{name_tour}', callback_data=f't3_football_{country}_{name_tour}')
+            link = types.InlineKeyboardButton(text=f'{name_tour}', callback_data=f't3_f_{country}_{name_tour.replace(" ", "_")}')
             markup2.add(link)
     elif sport == 'basketball':
         for links in basketball_menu[country]:
@@ -70,6 +72,8 @@ async def handle_query_foot_link(call: types.CallbackQuery):
 async def handle_query_foot(call: types.CallbackQuery):
     action = call.data.split('_')
     sport = action[1]
+    if sport == 'f':
+        sport = 'football'
     t_name = action[2]
     t_leag = action[3]
     if sport == 'hockey':
@@ -129,8 +133,9 @@ async def handle_query_foot1(call: types.CallbackQuery):
     league_link[6] = time
     league_link = '/'.join(league_link)
     print(league_link)
-    await parse_table(league_link, t_name+ ' ' + t_leag)
+    await parse_table(league_link)
     await bot.send_message(call.from_user.id, 'Парсинг')
+    clear_sheet(sheet_name)
     push_csv_to_gsheet(
         worksheet_name=sheet_name,
         sheet_id=find_sheet_id_by_name(sheet_name),
@@ -205,7 +210,7 @@ async def today_tourner(call: types.CallbackQuery):
             link = tour.split(' | ')[1].replace('https://old.24score.pro/', '').split("/")
             link = link[1] + '/' + link[2]
             if link == tour_link:
-                db.update_queue(tour)
+                db.update_queue(county + "| " + tour)
                 await call.answer(f"{tour.split(' | ')[0]} добавлен в очередь")
 
 # показать очередь на парсинг
@@ -241,17 +246,28 @@ async def clear_queue(call: types.CallbackQuery):
 async def clear_queue(call: types.CallbackQuery):
     queue = db.get_queue()
     col = 0
+    sp = queue[0]
+    link1 = sp[0].split(' | ')[1]
+    sport1 = link1.replace('https://old.24score.pro/', '').split('/')[0]
+    if sport1 == 'hockey':
+        clear_sheet('Hockey')
+    elif sport1 == 'football':
+        clear_sheet('Football')
+    elif sport1 == 'basketball':
+        clear_sheet('Basketball')
     for tour in queue:
-        name = tour[0].split(' | ')[0]
+        # counrty = tour[0].split(' | ')[0]
+        # name = tour[0].split('| ')[1]
         link = tour[0].split(' | ')[1]
         sport = link.replace('https://old.24score.pro/', '').split('/')[0]
-        await parse_table(link, name)
+        await parse_table(link)
         if sport == 'hockey':
             sheet_name = 'Hockey'
         elif sport == 'football':
             sheet_name = 'Football'
         elif sport == 'basketball':
             sheet_name = 'Basketball'
+
         push_csv_to_gsheet(
             worksheet_name=sheet_name,
             sheet_id=find_sheet_id_by_name(sheet_name),

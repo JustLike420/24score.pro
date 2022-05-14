@@ -76,7 +76,7 @@ def get_menu(sport):
     return link_list
 
 
-async def parse_table(url, name_tour):
+async def parse_table(url):
     r = requests.get(url,
                      headers=headers)
     print(url)
@@ -131,7 +131,17 @@ def find_sheet_id_by_name(sheet_name):
         if 'title' in sheet['properties'].keys():
             if sheet['properties']['title'] == sheet_name:
                 return sheet['properties']['sheetId']
-
+def clear_sheet(worksheet_name):
+    if worksheet_name == 'Hockey':
+        range1 = "'Hockey'!A1:Z1500"
+    elif worksheet_name == 'Football':
+        range1 = "'Football'!A1:Z1500"
+    else:
+        range1 = "'Basketball'!A1:Z1500"
+    request1 = API.spreadsheets().values().clear(
+        spreadsheetId=SPREADSHEET_ID,
+        range=range1,
+    ).execute()
 
 def push_csv_to_gsheet(sheet_id, worksheet_name, column=0):
     with open('data.csv', 'r', encoding='utf-8') as csv_file:
@@ -150,17 +160,18 @@ def push_csv_to_gsheet(sheet_id, worksheet_name, column=0):
             }
         }]
     }
-    if worksheet_name == 'Hockey':
-        range1 = "'Hockey'!A1:Z1500"
-    elif worksheet_name == 'Football':
-        range1 = "'Football'!A1:Z1500"
-    else:
-        range1 = "'Basketball'!A1:Z1500"
-    request1 = API.spreadsheets().values().clear(
-        spreadsheetId=SPREADSHEET_ID,
-        range=range1,
-    ).execute()
-    print(request1)
+
+    # if worksheet_name == 'Hockey':
+    #     range1 = "'Hockey'!A1:Z1500"
+    # elif worksheet_name == 'Football':
+    #     range1 = "'Football'!A1:Z1500"
+    # else:
+    #     range1 = "'Basketball'!A1:Z1500"
+    # request1 = API.spreadsheets().values().clear(
+    #     spreadsheetId=SPREADSHEET_ID,
+    #     range=range1,
+    # ).execute()
+    # print(request1)
     request = API.spreadsheets().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=body)
     response = request.execute()
     return response
